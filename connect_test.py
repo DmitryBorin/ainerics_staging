@@ -19,15 +19,13 @@ def pipe_set(cam_id):
     Gst.init(None)
     Gst.segtrap_set_enabled(False)
     pipe = Gst.parse_launch("""
-        rtmpsrc location=rtmp://127.0.0.1:5935/live/""" + str(cam_id) + """ ! queue !
-        
-        flvdemux name=demuxer
-        demuxer.audio ! queue max-size-time=0 max-size-bytes=0 max-size-buffers=0 ! fakesink
-        demuxer.video ! queue max-size-time=0 max-size-bytes=0 max-size-buffers=0 ! decodebin ! tee name=t
-        
-        t. ! queue max-size-time=0 max-size-bytes=0 max-size-buffers=0 !
-        videoconvert ! video/x-raw,format=BGR ! appsink name=sink
-        
+            rtmpsrc location=rtmp://127.0.0.1:5935/live/""" + str(cam_id) + """ ! queue !
+
+            flvdemux name=demuxer
+            demuxer.video ! queue ! decodebin ! tee name=t
+
+            t. ! queue ! videoconvert ! video/x-raw,format=BGR ! appsink name=sink
+
         """)
     return pipe
 
